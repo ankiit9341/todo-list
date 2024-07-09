@@ -2,7 +2,7 @@ import './App.css';
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { IoMdCheckmarkCircle } from "react-icons/io";
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 
 function App() {
   const [isActive, setActive] = useState(false);
@@ -10,6 +10,10 @@ function App() {
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [completedTask,setcompletedTask] = useState([]);
+  const [isEditing,setIsEditing] = useState(false);
+  const [currentIndex,setCurrentIndex] = useState(null);
+
+
 
   useEffect(() => {
     const storedTodo = JSON.parse(localStorage.getItem('todoList'));
@@ -22,14 +26,29 @@ function App() {
     }
   }, []);
 
-  const handleEditing = (index) =>{
-    let CurrEditItem = todo[index];
+  const handleEditing = (index) => {
+    setNewTitle(todo[index].title);
+    setNewDesc(todo[index].desc);
+    setIsEditing(true);
+    setCurrentIndex(index);
+  };
 
-    setNewTitle(CurrEditItem.newTitle);
-    setNewDesc(CurrEditItem.newDesc);
-  }
+  const handleSaveEdit = () => {
+    let updatedTodo = [...todo];
+    updatedTodo[currentIndex] = { title: newTitle, desc: newDesc };
+    setTodo(updatedTodo);
+    localStorage.setItem('todoList', JSON.stringify(updatedTodo));
+    setNewTitle('');
+    setNewDesc('');
+    setIsEditing(false);
+    setCurrentIndex(null);
+  };
 
-  const handleTodo = ()=>{
+  const handleTodo = () => {
+    if (isEditing) {
+      handleSaveEdit();
+      return;
+    }
     let newTodoItem = {
       title:newTitle,
       desc:newDesc
@@ -101,7 +120,8 @@ function App() {
            </div>
            <div className="todo-input-item">
             <label htmlFor="Description">Description</label>
-            <input id='Description' className="My-inputs" type="text" value={newDesc} onChange={(e)=>setNewDesc(e.target.value)} placeholder="Add about your task" />
+            <input id='Description'  className="My-inputs" type="text" value={newDesc} onChange={(e)=>{ console.log("hi")
+              setNewDesc(e.target.value)}} placeholder="Add about your task" />
            </div>
            <div className="todo-input-item">
             <button disabled={newTitle.length===0} type="button" className="add-btn" onClick={handleTodo} > Add</button>
